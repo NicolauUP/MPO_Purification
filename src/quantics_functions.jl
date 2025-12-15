@@ -5,6 +5,22 @@ Functions for the quantics (Q) tensor cross interpolation (TCI).
 """
 
 
+
+function Convert_To_Binary(n::Int64, NSites::Int64)
+    bits = last(bitstring(n), NSites)
+    VectorString = []
+    for i in bits
+        push!(VectorString, string(i))
+    end
+    return VectorString
+end
+
+
+function BasisStateMPS(n::Int64, sites::Vector{<:Index})
+    # Create a random MPS with the given sites and binary vector
+    return random_mps(sites, Convert_To_Binary(n, length(sites)))
+end
+
 """
      MatrixChecker(mpo::MPO, sites::Vector{<:Index}, i::Int64, j::Int64)
 Check the matrix element of an MPO between two basis states specified by indices i and j

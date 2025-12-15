@@ -5,7 +5,7 @@ ITensors.op(::OpName"σ+", ::SiteType"Qubit") = [0 1; 0 0]
 ITensors.op(::OpName"σ-", ::SiteType"Qubit") = [0 0; 1 0]
 
 #Define the Identity MPO
-
+export Build_H_MF_1D, translation_MPO, Identity_MPO
 function Identity_MPO(Sites::Vector{<:Index})
 
     NSites = length(Sites)
@@ -43,8 +43,8 @@ function translation_MPO(sites::Vector{<:Index})
         end
 
         for i in 1:l-1
-            opsum_R_Temp += 1, "Id", i # Identity
-            opsum_L_Temp += 1, "Id", i # Identity
+            opsum_R_Temp *= 1, "Id", i # Identity
+            opsum_L_Temp *= 1, "Id", i # Identity
         end
         
         T_R_op_sum += opsum_R_Temp
@@ -59,14 +59,15 @@ end
 
 
 
-function Build_H_MF_1D(T::Function, eltype::Type{<:Number}, sites::Vector{<:Index}, ϵ::Float64,χ::Int64)
+function Build_H_MF_1D(V::Function,T::Function, eltype::Type{<:Number}, sites::Vector{<:Index}, ϵ::Float64,χ::Int64)
 
-    _, HopMPO, _ = QuanticsTCI(T, eltype, sites, ϵ) #MPO for the hopping function 
+    _, HopMPO, _ = Quantics_TCI(T, eltype, sites, ϵ) #MPO for the hopping function 
+    _, PotMPO, _ = Quantics_TCI(V, eltype, sites, ϵ) #MPO for the hopping function 
 
     T_R, T_L = translation_MPO(sites) #Translation MPOs
 
     H_T_R = apply(HopMPO, T_R; cutoff = ϵ, maxdim = χ) #Apply HoppingMPO to the translation MPO
     H_T_L = apply(T_L, ITensors.dag(HopMPO); cutoff = ϵ, maxdim = χ) #Hermitian COnjugate
 
-    return +(H_T_R, H_T_L; cutoff = ϵ, maxdim = χ)
+    return +(PotMPO,H_T_R, H_T_L; cutoff = ϵ, maxdim = χ)
 end
