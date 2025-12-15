@@ -1,0 +1,11 @@
+# Ignore Slurm output files
+*.out
+
+# Ignore the logs directory
+logs/
+
+# Ignore Mac system files
+.DS_Store
+
+# Ignore Julia temporary files (if any)
+*.ji
